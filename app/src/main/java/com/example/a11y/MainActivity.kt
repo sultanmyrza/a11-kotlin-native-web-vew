@@ -3,6 +3,8 @@ package com.example.a11y
 import android.os.Bundle
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebSettings
+import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,13 +35,36 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun WebViewContent(url: String, modifier: Modifier = Modifier) {
     AndroidView(
         factory = { context ->
             WebView(context).apply {
+                // Set a custom WebViewClient to handle page navigation
                 webViewClient = WebViewClient()
-                settings.javaScriptEnabled = true  // Enable JavaScript
+                
+                // Configure WebView settings with security measures
+                settings.apply {
+                    // Enable JavaScript (required for many modern websites)
+                    // Note: This can introduce security risks, use with caution
+                    javaScriptEnabled = true
+                    
+                    // Prevent loading of mixed content (HTTP content in HTTPS pages)
+                    mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                    
+                    // Disable file system access
+                    allowFileAccess = false
+                    
+                    // Disable content provider access
+                    allowContentAccess = false
+                    
+                    // Prevent access to local files from web content
+                    allowFileAccessFromFileURLs = false
+                    allowUniversalAccessFromFileURLs = false
+                }
+                
+                // Load the specified URL
                 loadUrl(url)
             }
         },

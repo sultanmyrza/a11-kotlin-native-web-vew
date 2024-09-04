@@ -14,9 +14,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.example.a11y.ui.theme.A11yTheme
 import androidx.activity.OnBackPressedCallback
 import android.os.Build
@@ -38,21 +42,32 @@ class MainActivity : ComponentActivity() {
                         url = "https://www.npmshops.com",
                         modifier = Modifier.padding(innerPadding)
                     )
+
+                    // Handle back navigation
+                    val lifecycleOwner = LocalLifecycleOwner.current
+                    DisposableEffect(lifecycleOwner) {
+                        val observer = LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_RESUME) {
+                                onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+                                    override fun handleOnBackPressed() {
+                                        if (webView.canGoBack()) {
+                                            webView.goBack()
+                                        } else {
+                                            isEnabled = false
+                                            onBackPressedDispatcher.onBackPressed()
+                                        }
+                                    }
+                                })
+                            }
+                        }
+                        lifecycleOwner.lifecycle.addObserver(observer)
+                        onDispose {
+                            lifecycleOwner.lifecycle.removeObserver(observer)
+                        }
+                    }
                 }
             }
         }
-
-        // Handle back button press
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (webView.canGoBack()) {
-                    webView.goBack()
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
-                }
-            }
-        })
     }
 }
 

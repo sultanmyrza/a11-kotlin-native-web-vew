@@ -1,16 +1,17 @@
 package com.example.a11y
 
 import android.os.Bundle
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.a11y.ui.theme.A11yTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,15 +20,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             A11yTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                WebViewContent(url = "https://www.npmshops.com")
             }
         }
     }
+}
+
+@Composable
+fun WebViewContent(url: String) {
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                loadUrl(url)
+            }
+        },
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 @Composable

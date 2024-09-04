@@ -32,6 +32,7 @@ fun WebViewContent(url: String) {
         factory = { context ->
             WebView(context).apply {
                 webViewClient = WebViewClient()
+                settings.javaScriptEnabled = true  // Enable JavaScript
                 loadUrl(url)
             }
         },

@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.a11y.ui.theme.A11yTheme
 import androidx.activity.OnBackPressedCallback
+import android.os.Build
 
 class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -78,9 +79,14 @@ fun WebViewContent(webView: WebView, url: String, modifier: Modifier = Modifier)
                 // Disable content provider access
                 allowContentAccess = false
                 
-                // Prevent access to local files from web content
-                allowFileAccessFromFileURLs = false
-                allowUniversalAccessFromFileURLs = false
+                // Set safe browsing to true for API 26+ (Android 8.0+)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    safeBrowsingEnabled = true
+                } else {
+                    // For older versions, use these settings as a fallback
+                    allowFileAccessFromFileURLs = false
+                    allowUniversalAccessFromFileURLs = false
+                }
             }
             
             // Load the specified URL

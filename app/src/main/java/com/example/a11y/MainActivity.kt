@@ -13,61 +13,79 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.a11y.ui.theme.A11yTheme
+import androidx.activity.OnBackPressedCallback
 
 class MainActivity : ComponentActivity() {
+    private lateinit var webView: WebView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             A11yTheme {
                 Scaffold { innerPadding ->
+                    val rememberedWebView = remember { WebView(this) }
+                    webView = rememberedWebView
+                    
                     WebViewContent(
+                        webView = rememberedWebView,
                         url = "https://www.npmshops.com",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
+
+        // Handle back button press
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun WebViewContent(url: String, modifier: Modifier = Modifier) {
+fun WebViewContent(webView: WebView, url: String, modifier: Modifier = Modifier) {
     AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                // Set a custom WebViewClient to handle page navigation
-                webViewClient = WebViewClient()
+        factory = { webView.apply {
+            // Set a custom WebViewClient to handle page navigation
+            webViewClient = WebViewClient()
+            
+            // Configure WebView settings with security measures
+            settings.apply {
+                // Enable JavaScript (required for many modern websites)
+                // Note: This can introduce security risks, use with caution
+                javaScriptEnabled = true
                 
-                // Configure WebView settings with security measures
-                settings.apply {
-                    // Enable JavaScript (required for many modern websites)
-                    // Note: This can introduce security risks, use with caution
-                    javaScriptEnabled = true
-                    
-                    // Prevent loading of mixed content (HTTP content in HTTPS pages)
-                    mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                    
-                    // Disable file system access
-                    allowFileAccess = false
-                    
-                    // Disable content provider access
-                    allowContentAccess = false
-                    
-                    // Prevent access to local files from web content
-                    allowFileAccessFromFileURLs = false
-                    allowUniversalAccessFromFileURLs = false
-                }
+                // Prevent loading of mixed content (HTTP content in HTTPS pages)
+                mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
                 
-                // Load the specified URL
-                loadUrl(url)
+                // Disable file system access
+                allowFileAccess = false
+                
+                // Disable content provider access
+                allowContentAccess = false
+                
+                // Prevent access to local files from web content
+                allowFileAccessFromFileURLs = false
+                allowUniversalAccessFromFileURLs = false
             }
-        },
+            
+            // Load the specified URL
+            loadUrl(url)
+        } },
         modifier = modifier.fillMaxSize()
     )
 }

@@ -81,6 +81,9 @@ fun WebViewContent(webView: WebView, url: String, modifier: Modifier = Modifier)
             
             // Configure WebView settings with security measures
             settings.apply {
+                // Set custom user agent
+                userAgentString = "NoonSpaceApp " + userAgentString
+                
                 // Enable JavaScript (required for many modern websites)
                 // Note: This can introduce security risks, use with caution
                 javaScriptEnabled = true

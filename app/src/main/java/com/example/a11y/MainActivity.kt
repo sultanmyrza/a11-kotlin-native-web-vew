@@ -24,6 +24,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import com.example.a11y.ui.theme.A11yTheme
 import androidx.activity.OnBackPressedCallback
 import android.os.Build
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -83,6 +84,9 @@ fun WebViewContent(webView: WebView, url: String, modifier: Modifier = Modifier)
             settings.apply {
                 // Set custom user agent
                 userAgentString = "NoonSpaceApp " + userAgentString
+                
+                // Debug print the user agent string
+                Log.d("WebViewDebug", "User Agent: $userAgentString")
                 
                 // Enable JavaScript (required for many modern websites)
                 // Note: This can introduce security risks, use with caution
